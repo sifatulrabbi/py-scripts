@@ -2,4 +2,5 @@
 .env
 __pycache__
 tmp/*
+users_to_test.json
 !.gitkeep

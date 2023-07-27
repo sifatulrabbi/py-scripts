@@ -1,32 +1,44 @@
 import os
-from pprint import pprint
+import stripe
+from dotenv import load_dotenv
 from pymongo import MongoClient
-from pymongo.errors import ConnectionFailure, CursorNotFound
+from pprint import pprint
 
 
 def connect_to_db():
-    try:
-        client = MongoClient(
-            os.getenv("MONGODB_PROD_URI"), serverSelectionTimeoutMS=5000
+    mongo_url = os.getenv("MONGODB_URI", "")
+    client = MongoClient(mongo_url)
+    database_name = client.get_database().name
+    print(f"connected db collection name: {database_name}")
+    conn = client[database_name]
+    return conn
+
+
+if __name__ == "__main__":
+    load_dotenv()
+    stripe.api_key = os.getenv("STRIPE_LIVE_API_KEY")
+
+    conn = connect_to_db()
+    collections = {
+        "users": conn.get_collection("users"),
+        "accounts": conn.get_collection("accounts"),
+        "appsumosubscriptions": conn.get_collection("appsumosubscriptions"),
+    }
+
+    user = collections["users"].find_one({"email": "sifatuli.r@gmail.com"})
+    # pprint("\n---------- USER -------------")
+    # pprint(user)
+
+    if user["sumoling"]:
+        sub = collections["appsumosubscriptions"].find_one(
+            {"activation_email": user["email"]}
         )
-        # The ismaster command is cheap and does not require auth.
-        client.admin.command("ismaster")
-        print("Connected to the MongoDB database")
-        return client
-    except ConnectionFailure as cf:
-        print("Error while connecting to the MongoDB database", cf)
+        # pprint("\n---------- APPSUMO SUB -------------")
+        # pprint(sub)
 
-
-client = connect_to_db()
-db = client["helloscribe"]
-Users = db["users"]
-Accounts = db["accounts"]
-AppSumoSubs = db["appsumosubscriptions"]
-
-
-def get_info_from_db():
-    try:
-        doc = Users.find_one({"email": "christinebklyn1@yahoo.com"})
-        pprint(doc)
-    except CursorNotFound as err:
-        print(err)
+        if sub and ("togai_synced" not in sub or sub["togai_synced"] != True):
+            account = collections["accounts"].find_one(
+                {"_id": user["ownedAccount"]}
+            )
+            stripe_cus = stripe.Customer.retrieve(account["customer_id"])
+            pprint(stripe_cus.to_dict()["metadata"])
