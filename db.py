@@ -25,20 +25,24 @@ if __name__ == "__main__":
         "appsumosubscriptions": conn.get_collection("appsumosubscriptions"),
     }
 
-    user = collections["users"].find_one({"email": "sifatuli.r@gmail.com"})
-    # pprint("\n---------- USER -------------")
-    # pprint(user)
+    user = collections["users"].find_one({"email": "test@helloscribe.ai"})
+    account = collections["accounts"].find_one({"_id": user["ownedAccount"]})
+    pprint(account)
 
-    if user["sumoling"]:
-        sub = collections["appsumosubscriptions"].find_one(
-            {"activation_email": user["email"]}
-        )
-        # pprint("\n---------- APPSUMO SUB -------------")
-        # pprint(sub)
+    # user = collections["users"].find_one({"email": "sifatuli.r@gmail.com"})
+    # # pprint("\n---------- USER -------------")
+    # # pprint(user)
 
-        if sub and ("togai_synced" not in sub or sub["togai_synced"] != True):
-            account = collections["accounts"].find_one(
-                {"_id": user["ownedAccount"]}
-            )
-            stripe_cus = stripe.Customer.retrieve(account["customer_id"])
-            pprint(stripe_cus.to_dict()["metadata"])
+    # if user["sumoling"]:
+    #     sub = collections["appsumosubscriptions"].find_one(
+    #         {"activation_email": user["email"]}
+    #     )
+    #     # pprint("\n---------- APPSUMO SUB -------------")
+    #     # pprint(sub)
+
+    #     if sub and ("togai_synced" not in sub or sub["togai_synced"] != True):
+    #         account = collections["accounts"].find_one(
+    #             {"_id": user["ownedAccount"]}
+    #         )
+    #         stripe_cus = stripe.Customer.retrieve(account["customer_id"])
+    #         pprint(stripe_cus.to_dict()["metadata"])
