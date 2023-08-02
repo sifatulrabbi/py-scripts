@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 from pymongo import MongoClient
 from pprint import pprint
 
+load_dotenv()
+
 
 def connect_to_db():
     mongo_url = os.getenv("MONGODB_URI", "")
@@ -15,7 +17,6 @@ def connect_to_db():
 
 
 if __name__ == "__main__":
-    load_dotenv()
     stripe.api_key = os.getenv("STRIPE_LIVE_API_KEY")
 
     conn = connect_to_db()
@@ -25,8 +26,9 @@ if __name__ == "__main__":
         "appsumosubscriptions": conn.get_collection("appsumosubscriptions"),
     }
 
-    user = collections["users"].find_one({"email": "test@helloscribe.ai"})
-    account = collections["accounts"].find_one({"_id": user["ownedAccount"]})
+    # user = collections["users"].find_one({"_id": "xxx"})
+    account = collections["accounts"].find_one({"customer_id": "xxx"})
+    user = collections["users"].find_one({"ownedAccount": account["_id"]})
     pprint(account)
 
     # user = collections["users"].find_one({"email": "sifatuli.r@gmail.com"})

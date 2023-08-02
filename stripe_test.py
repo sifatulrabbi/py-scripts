@@ -15,5 +15,5 @@ stripe.api_key = os.getenv("STRIPE_LIVE_API_KEY")
 # )
 # pprint(subs)
 
-cus = stripe.Customer.retrieve(id="cus_OJzlf2II6A5fWi")
+cus = stripe.Customer.retrieve(id="xxx")
 pprint(cus)
